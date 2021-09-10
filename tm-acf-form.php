@@ -214,7 +214,7 @@ function tm_acf_form_page_template( $page_template ) {
 
 // Register Custom Post Type TM ACF Form
 function create_tm_acf_form_cpt() {
-
+	echo '';
 	// get all post types from the db and create them on init
 	global $wpdb;
 
@@ -279,44 +279,37 @@ function create_tm_acf_form_cpt() {
 				);
 				register_post_type( $formslug, $args );
 
-				$new_field_group = array(
-					'post_title'     => $formname,
-					'post_excerpt'   => sanitize_title( $formname ),
-					'post_name'      => $formslug,
-					'post_date'      => date( 'Y-m-d H:i:s' ),
-					'comment_status' => 'closed',
-					'post_status'    => 'publish',
-					'post_type'      => 'acf-field-group',
-				);
-				$field_id = wp_insert_post( $new_field_group );
 
-				/*if( function_exists('acf_add_local_field_group') ) {
-
-					acf_add_local_field_group(array(
-						'key' => $formslug,
-						'title' => $formname,
-						'fields' => array(
-						),
-						'location' => array(
-							array(
+				if( function_exists('acf_add_local_field_group') ) {
+					$field_group = acf_get_field_group($formslug);
+					var_dump($field_group);
+					if(!$field_group) {
+						acf_add_local_field_group(array(
+							'key' => $formslug,
+							'title' => $formname,
+							'fields' => array(
+							),
+							'location' => array(
 								array(
-									'param' => 'post_type',
-									'operator' => '==',
-									'value' => $formslug,
+									array(
+										'param' => 'post_type',
+										'operator' => '==',
+										'value' => $formslug,
+									),
 								),
 							),
-						),
-						'menu_order' => 0,
-						'position' => 'normal',
-						'style' => 'default',
-						'label_placement' => 'top',
-						'instruction_placement' => 'label',
-						'hide_on_screen' => '',
-						'active' => true,
-						'description' => '',
-					));
-					
-				}*/
+							'menu_order' => 0,
+							'position' => 'normal',
+							'style' => 'default',
+							'label_placement' => 'top',
+							'instruction_placement' => 'label',
+							'hide_on_screen' => '',
+							'active' => true,
+							'description' => '',
+						));
+					}
+						
+				}
 
 				/*$current_user = wp_get_current_user();
         
@@ -338,3 +331,21 @@ function create_tm_acf_form_cpt() {
 
 }
 add_action( 'init', 'create_tm_acf_form_cpt', 0 );
+
+
+function check_acf_fields() {
+	$field_group = acf_get_field_group('tm_form_giraffe');
+	// var_dump($field_group);
+	// echo 'test';
+
+	$field_groups = acf_get_field_groups();
+
+	foreach ($field_groups as $group) {
+		var_dump($group['key']);
+
+		acf_get_store( 'field-groups' )->remove( $group['key'] );
+	}
+
+}
+// add_action( 'init', 'check_acf_fields', 0 );
+echo 'test';
