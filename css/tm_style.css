@@ -1,0 +1,11 @@
+.acf-button.button.button-primary.button-large, .button.button-primary.button-large {
+    margin-top: 2rem;
+    border: 2px solid #00EA00;
+    background-color: transparent;
+}
+
+.acf-button.button.button-primary.button-large:hover, .button.button-primary.button-large:hover {
+    background-color: #00EA00;
+    color: #fff;
+	cursor: pointer;
+}
