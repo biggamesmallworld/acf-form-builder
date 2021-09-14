@@ -211,10 +211,8 @@ function tm_acf_form_page_template( $page_template ) {
     return $page_template;
 }
 
-
 // Register Custom Post Type TM ACF Form
 function create_tm_acf_form_cpt() {
-	echo '';
 	// get all post types from the db and create them on init
 	global $wpdb;
 
@@ -280,50 +278,73 @@ function create_tm_acf_form_cpt() {
 				register_post_type( $formslug, $args );
 
 
-				if( function_exists('acf_add_local_field_group') ) {
-					$field_group = acf_get_field_group($formslug);
-					var_dump($field_group);
-					if(!$field_group) {
-						acf_add_local_field_group(array(
-							'key' => $formslug,
-							'title' => $formname,
-							'fields' => array(
-							),
-							'location' => array(
-								array(
-									array(
-										'param' => 'post_type',
-										'operator' => '==',
-										'value' => $formslug,
-									),
+				$postid = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_title = '$formname' AND post_type = 'acf-field-group'" );
+				var_dump($postid);
+				echo '<br />';
+				if(!$postid) {
+					$field_group = array(
+						'post_title'     => $formname,
+						'post_excerpt'   => sanitize_title( $formname ),
+						'post_name'      => 'group_' . $formslug,
+						'post_date'      => date( 'Y-m-d H:i:s' ),
+						'comment_status' => 'closed',
+						'post_status'    => 'publish',
+						'post_type'      => 'acf-field-group',
+					);
+					$post_id  = wp_insert_post( $field_group );
+
+					$group_post = get_post($post_id);
+					var_dump($group_post);
+					echo '<br />';
+					echo 'test';
+
+
+					acf_add_local_field_group(array (
+						'key' => 'group_'.$formname,
+						'title' => $formname,
+						'fields' => array (
+							array (
+								'key' => 'field_1',
+								'label' => 'Sub Title',
+								'name' => 'sub_title',
+								'type' => 'text',
+								'prefix' => '',
+								'instructions' => '',
+								'required' => 0,
+								'conditional_logic' => 0,
+								'wrapper' => array (
+									'width' => '',
+									'class' => '',
+									'id' => '',
+								),
+								'default_value' => '',
+								'placeholder' => '',
+								'prepend' => '',
+								'append' => '',
+								'maxlength' => '',
+								'readonly' => 0,
+								'disabled' => 0,
+							)
+						),
+						'location' => array (
+							array (
+								array (
+									'param' => 'post_type',
+									'operator' => '==',
+									'value' => $formslug,
 								),
 							),
-							'menu_order' => 0,
-							'position' => 'normal',
-							'style' => 'default',
-							'label_placement' => 'top',
-							'instruction_placement' => 'label',
-							'hide_on_screen' => '',
-							'active' => true,
-							'description' => '',
-						));
-					}
-						
-				}
+						),
+						'menu_order' => 0,
+						'position' => 'normal',
+						'style' => 'default',
+						'label_placement' => 'top',
+						'instruction_placement' => 'label',
+						'hide_on_screen' => '',
+					));
+					
 
-				/*$current_user = wp_get_current_user();
-        
-				// create post object
-				$post = array(
-					'post_title'  => __( 'TM Empty '. $formname.' Form' ),
-					'post_status' => 'publish',
-					'post_author' => $current_user->ID,
-					'post_type'   => $formslug,
-					'post_content' => 'This is a test'
-				);
-				
-				// insert the post into the database
-				wp_insert_post( $post );*/
+				}
 			}
 		}
 
@@ -331,21 +352,24 @@ function create_tm_acf_form_cpt() {
 
 }
 add_action( 'init', 'create_tm_acf_form_cpt', 0 );
+echo 'butts';
 
-
-function check_acf_fields() {
-	$field_group = acf_get_field_group('tm_form_giraffe');
-	// var_dump($field_group);
-	// echo 'test';
-
-	$field_groups = acf_get_field_groups();
-
-	foreach ($field_groups as $group) {
-		var_dump($group['key']);
-
-		acf_get_store( 'field-groups' )->remove( $group['key'] );
+function deleteposts() {
+	$args = array(
+		'numberposts'	=> 500,
+		'post_type'		=> 'acf-field-group'
+	);
+	$my_posts = get_posts( $args );
+	// var_dump($my_posts);
+	foreach ($my_posts as $post) {
+		/*echo $post->post_name;
+		echo '<br />';
+		echo $post->ID;
+		echo '<br />';
+		var_dump(get_post_meta($post->ID));
+		echo '<br />';*/
+		wp_delete_post($post->ID, false);
 	}
-
 }
-// add_action( 'init', 'check_acf_fields', 0 );
-echo 'test';
+// add_action( 'init', 'deleteposts', 0 );
+// echo 'test';
